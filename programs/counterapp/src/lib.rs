@@ -1,4 +1,5 @@
 use anchor_lang::prelude::*;
+use std::mem::size_of;
 
 declare_id!("8kJ7GHGMeVzHzKZGYvVnQJyYMVnAPTYgb4GeXw6ury8s");
 
@@ -6,11 +7,29 @@ declare_id!("8kJ7GHGMeVzHzKZGYvVnQJyYMVnAPTYgb4GeXw6ury8s");
 pub mod counterapp {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        msg!("Greetings from: {:?}", ctx.program_id);
+    pub fn initialize(ctx: Context<Initialize>,key: u64) -> Result<()> {
         Ok(())
     }
 }
 
 #[derive(Accounts)]
-pub struct Initialize {}
+#[instruction(key: u64)]
+pub struct Initialize<'info> {
+
+    #[account(init,
+              payer = signer,
+              space = size_of::<Val>() + 8,
+              seeds=[&key.to_le_bytes().as_ref()],
+              bump)]
+    val: Account<'info, Val>,
+
+    #[account(mut)]
+    signer: Signer<'info>,
+
+    system_program: Program<'info, System>,
+}
+
+#[account]
+pub struct Val{
+    value: u64,
+}

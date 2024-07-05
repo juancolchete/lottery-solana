@@ -9,8 +9,14 @@ describe("counterapp", () => {
   const program = anchor.workspace.Counterapp as Program<Counterapp>;
 
   it("Is initialized!", async () => {
-    // Add your test here.
-    const tx = await program.methods.initialize().rpc();
-    console.log("Your transaction signature", tx);
+    const key = new anchor.BN(42);
+
+    const seeds = [key.toArrayLike(Buffer,"le",8)];
+    let valueAccount = anchor.web3.PublicKey.findProgramAddressSync(
+      seeds,
+      program.programId
+    )[0];
+
+    await program.methods.initialize(key).accounts(valueAccount).rpc()
   });
 });

@@ -7,12 +7,17 @@ declare_id!("8kJ7GHGMeVzHzKZGYvVnQJyYMVnAPTYgb4GeXw6ury8s");
 pub mod lottery {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>,key1: u64, key2: u64) -> Result<()> {
+    pub fn initialize(ctx: Context<Initialize>, key1: u64, key2: u64) -> Result<()> {
         Ok(())
     }
 
-    pub fn set(ctx: Context<Set>, key1: u64, key2: u64 ,val: u64) -> Result<()>{
-        ctx.accounts.val.value = val;
+    pub fn set(ctx: Context<Set>, key1: u64, key2: u64, val: u64) -> Result<()> {
+        for i in 0..ctx.accounts.val.value.len() as usize {
+          if ctx.accounts.val.value[i] == 0{
+            ctx.accounts.val.value[i] = val;
+            break;
+          }
+        }
         Ok(())
     }
 }
@@ -20,7 +25,6 @@ pub mod lottery {
 #[derive(Accounts)]
 #[instruction(key1: u64, key2: u64)]
 pub struct Initialize<'info> {
-
     #[account(init,
               payer = signer,
               space = size_of::<Val>() + 8,
@@ -36,7 +40,7 @@ pub struct Initialize<'info> {
 
 #[derive(Accounts)]
 #[instruction(key1: u64,key2: u64)]
-pub struct Set<'info>{
+pub struct Set<'info> {
     #[account(mut)]
     val: Account<'info, Val>,
     #[account(mut)]
@@ -44,7 +48,8 @@ pub struct Set<'info>{
 }
 
 #[account]
-#[derive(Default)]
-pub struct Val{
-    value: u64,
+// #[derive(Default)]
+pub struct Val {
+    value: [u64; 50],
+    index: u64,
 }

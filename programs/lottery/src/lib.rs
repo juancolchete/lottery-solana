@@ -39,9 +39,12 @@ pub struct Initialize<'info> {
 pub struct Set<'info>{
     #[account(mut)]
     val: Account<'info, Val>,
+    #[account(mut)]
+    signer: Signer<'info>,
 }
 
 #[account]
+#[derive(Default)]
 pub struct Val{
     value: u64,
 }

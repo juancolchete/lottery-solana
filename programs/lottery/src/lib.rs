@@ -42,12 +42,42 @@ pub mod lottery {
     }
     pub fn pickWinner(ctx: Context<Set>, key1: u64, key2: u64, ticket_number: u64) -> Result<()> {
         for i in 0..ctx.accounts.lottery_info.tickets.len() {
-            if ctx.accounts.lottery_info.tickets[i].number == ticket_number {
-                msg!("aaa {}", ticket_number);
+            let mut match_count: u64 = 0;
+            let number = ctx.accounts.lottery_info.tickets[i].number;
+            if number / 100000 == ticket_number / 100000 {
+                match_count = match_count + 1;
+            }
+            if number / 10000 - number / 100000 * 10 == ticket_number / 10000 - ticket_number / 100000 * 10 {
+                match_count = match_count + 1;
+            }
+            if number / 1000 - number / 10000 * 10== ticket_number / 1000 - ticket_number / 10000 * 10{
+                match_count = match_count + 1;
+            }
+            if number / 100 - number / 1000 * 10== ticket_number / 100 - ticket_number / 1000 * 10{
+                match_count = match_count + 1;
+            }
+            if number / 10 - number / 100 * 10== ticket_number / 10 - ticket_number / 100 * 10{
+                match_count = match_count + 1;
+            }
+            if number - number / 10 == ticket_number - ticket_number / 10 {
+                match_count = match_count + 1;
+            }
+            if match_count == 6 {
                 ctx.accounts.lottery_info.full_match.push(i as u64);
                 ctx.accounts.lottery_info.full_match_count +=
                     ctx.accounts.lottery_info.tickets[i].buyers.len() as u64;
-                break;
+            } else if match_count == 5 {
+                ctx.accounts.lottery_info.partial5_match.push(i as u64);
+                ctx.accounts.lottery_info.partial5_count +=
+                    ctx.accounts.lottery_info.tickets[i].buyers.len() as u64;
+            } else if match_count == 4 {
+                ctx.accounts.lottery_info.partial5_match.push(i as u64);
+                ctx.accounts.lottery_info.partial5_count +=
+                    ctx.accounts.lottery_info.tickets[i].buyers.len() as u64;
+            } else if match_count == 3 {
+                ctx.accounts.lottery_info.partial5_match.push(i as u64);
+                ctx.accounts.lottery_info.partial5_count +=
+                    ctx.accounts.lottery_info.tickets[i].buyers.len() as u64;
             }
         }
         Ok(())

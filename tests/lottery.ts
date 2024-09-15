@@ -33,6 +33,7 @@ describe("lottery", () => {
     const keyTwo = new anchor.BN(5);
     const valDefault = new anchor.BN(1000000);
     const ticketNumber = new anchor.BN(1999999);
+    const ticketNumberUser = new anchor.BN(1899999);
 
     const seeds = [key1.toArrayLike(Buffer, "le", 8), key2.toArrayLike(Buffer, "le", 8)];
     let valueAccount = anchor.web3.PublicKey.findProgramAddressSync(
@@ -56,11 +57,13 @@ describe("lottery", () => {
     // await program.methods.set(keyOne,keyTwo,valSigner).accounts({signer:newKeypair.publicKey, lotteryInfo: valueAccountTwo }).signers([newKeypair]).rpc()
 
 
-    await program.methods.pickWinner(key1,key2,ticketNumber).accounts({ lotteryInfo: valueAccount }).rpc()
+    await program.methods.pickWinner(key1,key2,ticketNumberUser).accounts({ lotteryInfo: valueAccount }).rpc()
     let result = await program.account.lotteryInfo.fetch(valueAccount)
-    console.log("result: ", result.tickets, valueAccount.toBase58())
-    console.log("result: ", result.fullMatchCount)
-    console.log("result: ", result.fullMatch)
+    console.log("resultTI: ", result.tickets, valueAccount.toBase58())
+    console.log("resultFC: ", result.fullMatchCount)
+    console.log("resultFM: ", result.fullMatch)
+    console.log("result5C: ", result.partial5Count)
+    console.log("result5M: ", result.partial5Match)
     // result = await program.account.lotteryInfo.fetch(valueAccountTwo)
 
     // console.log("result: ", result, valueAccountTwo.toBase58())

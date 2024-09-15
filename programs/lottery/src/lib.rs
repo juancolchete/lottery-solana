@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use std::mem::size_of;
+use std::{mem::size_of, u64};
 
 declare_id!("8kJ7GHGMeVzHzKZGYvVnQJyYMVnAPTYgb4GeXw6ury8s");
 
@@ -40,6 +40,18 @@ pub mod lottery {
         }
         Ok(())
     }
+    pub fn pickWinner(ctx: Context<Set>, key1: u64, key2: u64, ticket_number: u64) -> Result<()> {
+        for i in 0..ctx.accounts.lottery_info.tickets.len() {
+            if ctx.accounts.lottery_info.tickets[i].number == ticket_number {
+                msg!("aaa {}", ticket_number);
+                ctx.accounts.lottery_info.full_match.push(i as u64);
+                ctx.accounts.lottery_info.full_match_count +=
+                    ctx.accounts.lottery_info.tickets[i].buyers.len() as u64;
+                break;
+            }
+        }
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
@@ -71,8 +83,14 @@ pub struct Set<'info> {
 pub struct LotteryInfo {
     default: Pubkey,
     tickets: Vec<Ticket>,
-    full_match: Vec<Pubkey>,
-    partial_match: Vec<Pubkey>,
+    full_match: Vec<u64>,
+    full_match_count: u64,
+    partial5_match: Vec<u64>,
+    partial5_count: u64,
+    partial4_match: Vec<u64>,
+    partial4_count: u64,
+    partial3_match: Vec<u64>,
+    partial3_count: u64,
 }
 #[error_code]
 pub enum LotteryError {

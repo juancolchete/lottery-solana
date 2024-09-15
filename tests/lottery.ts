@@ -55,9 +55,12 @@ describe("lottery", () => {
     // await program.methods.set(keyOne,keyTwo,valDefault).accounts({lotteryInfo: valueAccountTwo }).rpc()
     // await program.methods.set(keyOne,keyTwo,valSigner).accounts({signer:newKeypair.publicKey, lotteryInfo: valueAccountTwo }).signers([newKeypair]).rpc()
 
-    let result = await program.account.lotteryInfo.fetch(valueAccount)
 
+    await program.methods.pickWinner(key1,key2,ticketNumber).accounts({ lotteryInfo: valueAccount }).rpc()
+    let result = await program.account.lotteryInfo.fetch(valueAccount)
     console.log("result: ", result.tickets, valueAccount.toBase58())
+    console.log("result: ", result.fullMatchCount)
+    console.log("result: ", result.fullMatch)
     // result = await program.account.lotteryInfo.fetch(valueAccountTwo)
 
     // console.log("result: ", result, valueAccountTwo.toBase58())

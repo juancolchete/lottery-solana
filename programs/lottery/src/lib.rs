@@ -11,27 +11,33 @@ pub mod lottery {
         Ok(())
     }
 
-    pub fn set(ctx: Context<Set>,key1: u64, key2: u64, ticket_number: u64) -> Result<()> {
-        // if ticket_number > 999999 && ticket_number < 2000000 {
-        //     for i in 0..ctx.accounts.lottery_info.tickets.len() as usize {
-        //         if ctx.accounts.lottery_info.tickets[i].number == 0 {
-        //             ctx.accounts.lottery_info.tickets[i].number = ticket_number;
-        //         }
-        //         if ctx.accounts.lottery_info.tickets[i].number == ticket_number {
-        //             for b in 0..ctx.accounts.lottery_info.tickets[i].buyers.len() as usize {
-        //                 if ctx.accounts.lottery_info.tickets[i].buyers[b]
-        //                     == ctx.accounts.lottery_info.default
-        //                 {
-        //                     ctx.accounts.lottery_info.tickets[i].buyers[b] = ctx.accounts.signer.key(); 
-        //                     break;
-        //                 }
-        //             }
-        //             break;
-        //         }
-        //     }
-        // }else{
-        //     return err!(LotteryError::WrongNumber);
-        // }
+    pub fn set(ctx: Context<Set>, key1: u64, key2: u64, ticket_number: u64) -> Result<()> {
+        if ticket_number > 999999 && ticket_number < 2000000 {
+            let lottery_info_len = ctx.accounts.lottery_info.tickets.len();
+            let buyer = ctx.accounts.signer.key();
+            if lottery_info_len == 0 {
+                let buyers = vec![buyer];
+                ctx.accounts.lottery_info.tickets.push(Ticket {
+                    buyers,
+                    number: ticket_number,
+                });
+            }
+            for i in 0..lottery_info_len {
+                if lottery_info_len == i {
+                    let buyers = vec![buyer];
+                    ctx.accounts.lottery_info.tickets.push(Ticket {
+                        buyers,
+                        number: ticket_number,
+                    });
+                }
+                if ctx.accounts.lottery_info.tickets[i].number == ticket_number {
+                    ctx.accounts.lottery_info.tickets[i].buyers.push(buyer);
+                    break;
+                }
+            }
+        } else {
+            return err!(LotteryError::WrongNumber);
+        }
         Ok(())
     }
 }
@@ -44,7 +50,7 @@ pub struct Initialize<'info> {
               space = size_of::<LotteryInfo>() + 8,
               seeds=[&key1.to_le_bytes().as_ref(),&key2.to_le_bytes().as_ref()],
               bump)]
-    lottery_info: Account<'info, Ticket>,
+    lottery_info: Account<'info, LotteryInfo>,
 
     #[account(mut)]
     signer: Signer<'info>,
@@ -64,9 +70,9 @@ pub struct Set<'info> {
 #[account]
 pub struct LotteryInfo {
     default: Pubkey,
-    tickets: [Ticket; 1000],
-    full_match: [Pubkey; 500],
-    partial_match: [Pubkey; 500],
+    tickets: Vec<Ticket>,
+    full_match: Vec<Pubkey>,
+    partial_match: Vec<Pubkey>,
 }
 #[error_code]
 pub enum LotteryError {
@@ -75,6 +81,6 @@ pub enum LotteryError {
 }
 #[account]
 pub struct Ticket {
-    buyers: [Pubkey; 50],
+    buyers: Vec<Pubkey>,
     number: u64,
 }
